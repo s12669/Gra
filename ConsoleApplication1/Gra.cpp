@@ -9,13 +9,18 @@ Gra::Gra()
 	window = init_window(800,600);
 	renderer = init_renderer(window);
 	background_texture = create_texture("resources/Ulica.bmp");
+	player_texture = create_texture("resources/Gracz.bmp");
+	enemy_texture = create_texture("resources/Przeciwnik.bmp");
 	start();
 }
 
 void Gra::start() {
 	bool Graj = true;
 	SDL_Event event;
+	last_render = SDL_GetTicks();
+	current_render = SDL_GetTicks();
 	while (Graj) {
+		current_render = SDL_GetTicks();
 		while (SDL_PollEvent(&event))
 		{
 			if (event.type == SDL_QUIT) Graj = false;
@@ -23,7 +28,12 @@ void Gra::start() {
 			{
 				switch (event.key.keysym.sym) {
 				case SDLK_RIGHT:
+					if (current_lane < 4)
+						current_lane++;
+					break;
 				case SDLK_LEFT:
+					if (current_lane > 0)
+						current_lane--;
 					break;
 				case SDLK_ESCAPE:
 					Graj = false;
@@ -33,11 +43,52 @@ void Gra::start() {
 		}
 		SDL_RenderClear(renderer.get());
 		SDL_RenderCopy(renderer.get(), background_texture.get(), NULL, NULL);
+		// func do robienie przeciwnikow
+		addEnemies();
+		// func do usuwanie przeciwnikow
+		removeEnemies();
+		//wykrywanie kolizji
 
+		//rysowanie przeciwnikow
+		drawEnemies();
 
+		SDL_Rect player_position = { current_lane* 160 + 20, 600- 140, 120, 120};
+		SDL_RenderCopy(renderer.get(), player_texture.get(), NULL, &player_position);
 
 		SDL_RenderPresent(renderer.get());
-		SDL_Delay(16);
+		SDL_Delay(1);
+		last_render = current_render;
+	}
+}
+
+void Gra::addEnemies() {
+	if (enemies.empty()) {
+		int lane = 1;
+		Przeciwnik p = Przeciwnik({ (double)160* lane + 20, -20.0 }, {0.0, 0.002}, {0.0,0.0003}, enemy_texture.get());
+		enemies.push_back(p);
+	}
+}
+
+void Gra::removeEnemies() {
+	std::list<Przeciwnik>::iterator enemy = enemies.begin();
+	while (enemy != enemies.end()) {
+		if (enemy->position[1] > 600 + 140) {
+			enemy = enemies.erase(enemy);
+		}
+		else {
+			enemy->move(current_render - last_render);
+			enemy++;
+		}
+	}
+}
+
+void Gra::drawEnemies() {
+	SDL_Rect player_position = { current_lane * 160 + 20, 600 - 140, 120, 120 };
+	std::list<Przeciwnik>::iterator enemy = enemies.begin();
+	while (enemy != enemies.end()) {
+		player_position = { (int)enemy->position[0], (int)enemy->position[1], 120, 200 };
+		SDL_RenderCopy(renderer.get(), enemy->texture, NULL, &player_position);
+		enemy++;
 	}
 }
 

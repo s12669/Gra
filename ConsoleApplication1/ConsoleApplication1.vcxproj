@@ -151,12 +151,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Gra.h" />
+    <ClInclude Include="Przeciwnik.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleApplication1.cpp" />
     <ClCompile Include="Gra.cpp" />
+    <ClCompile Include="Przeciwnik.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
