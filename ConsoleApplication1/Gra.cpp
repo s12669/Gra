@@ -4,13 +4,14 @@
 #include <memory>
 #include <string>
 #include <random>
+#include <SDL_ttf.h>
 Gra::Gra()
 {
 	window = init_window(800,600);
 	renderer = init_renderer(window);
 	background_texture = create_texture("resources/Ulica.bmp");
 	player_texture = create_texture("resources/Gracz.bmp");
-	enemy_texture = create_texture("resources/Przeciwnik.bmp");
+	enemy_texture = create_texture("resources/Przeciwnik.bmp" , true, 255, 255, 0);
 	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.0 }, { 0.0,0.0 });
 	fizykabg.velocity[1] = 0.007;
 	fizykabg.acceleration[1] = 0.0004;
@@ -55,6 +56,8 @@ void Gra::start() {
 		//rysowanie przeciwnikow
 		drawEnemies();
 
+		drawPoints();
+
 		SDL_Rect player_position = { current_lane* 160 + 20, 600- 140, 120, 120};
 		SDL_RenderCopy(renderer.get(), player_texture.get(), NULL, &player_position);
 
@@ -69,10 +72,11 @@ void Gra::addEnemies() {
 	std::mt19937 eng(rd()); // seed the generator
 	std::uniform_int_distribution<> distr(0, 4); // define the range
 
-	if (enemies.empty()) {
+	if (enemies.size() < 7 && lastEnemySpawn + enemyRespawnTime < current_render) {
 		int lane = distr(eng);
-		Przeciwnik p = Przeciwnik({ (double)160* lane + 20, -220.0 }, {0.0, 0.002}, {0.0,0.0003}, enemy_texture.get());
+		Przeciwnik p = Przeciwnik({ (double)160* lane + 20, -260.0 }, {0.0, 0.002}, {0.0,0.0003}, enemy_texture.get());
 		enemies.push_back(p);
+		lastEnemySpawn = current_render;
 	}
 }
 
@@ -80,6 +84,7 @@ void Gra::removeEnemies() {
 	std::list<Przeciwnik>::iterator enemy = enemies.begin();
 	while (enemy != enemies.end()) {
 		if (enemy->position[1] > 600 + 140) {
+			score++;
 			enemy = enemies.erase(enemy);
 		}
 		else {
@@ -114,6 +119,43 @@ void Gra::animateBg() {
 	SDL_RenderCopy(renderer.get(), background_texture.get(), NULL, &dst_bg2);
 }
 
+void Gra::drawPoints() {
+	SDL_Rect dst_bg = { 0, 0, 100,  20};
+	std::shared_ptr< SDL_Texture > napis = initText("Punkty:" + std::to_string(score));
+	SDL_RenderCopy(this->renderer.get(), napis.get(), NULL, &dst_bg);
+}
+
+// tworzenie tekstu (wzorowane na http://lazyfoo.net/tutorials/SDL/16_true_type_fonts/index.php)
+std::shared_ptr< SDL_Texture > Gra::initText(std::string text) {
+
+	SDL_Color color = { 255, 0, 161 };
+	auto font = initFont("fonts/uni.ttf");
+
+	SDL_Surface *surface = TTF_RenderText_Solid(font.get(), text.c_str(), color);
+	SDL_Texture *t = SDL_CreateTextureFromSurface(renderer.get(), surface);
+	SDL_FreeSurface(surface);
+
+	std::shared_ptr< SDL_Texture > texture(t, [](SDL_Texture * ptr) {
+		SDL_DestroyTexture(ptr);
+		ptr = NULL;
+	});
+
+	return texture;
+}
+
+// tworzenie fontu
+std::shared_ptr< TTF_Font > Gra::initFont(std::string fontName) {
+
+	TTF_Font *f = TTF_OpenFont(fontName.c_str(), 20);
+
+	std::shared_ptr< TTF_Font > font(f, [](TTF_Font * ptr) {
+		TTF_CloseFont(ptr);
+		ptr = NULL;
+	});
+
+	return font;
+}
+
 std::shared_ptr<SDL_Window> Gra::init_window(const int width = 800, const int height = 600) {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) errthrow("SDL_Init");
 
@@ -142,10 +184,10 @@ void Gra::errthrow(const std::string &e) {
 	throw std::runtime_error(errstr);
 };
 
-std::shared_ptr<SDL_Texture> Gra::create_texture(std::string resource_path, bool apply_alhpa /*false*/, int r /*0*/, int g /*255*/, int b /*0*/)
+std::shared_ptr<SDL_Texture> Gra::create_texture(std::string resource_path, bool apply_alpha /*false*/, int r /*0*/, int g /*255*/, int b /*0*/)
 {
 	std::shared_ptr<SDL_Surface> surface = create_surface(resource_path);
-	if (apply_alhpa)
+	if (apply_alpha)
 	{
 		Uint32 pixel = SDL_MapRGB(surface->format, r, g, b);
 		SDL_SetColorKey(surface.get(), SDL_TRUE, pixel);
