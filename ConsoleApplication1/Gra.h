@@ -20,6 +20,7 @@ private:
 	int lastEnemySpawn = 0;
 	int score=0;
 	int laneWidth = 160, playerX = 0, playerY = 0, playerSize = 120;
+	int enemyWidth, enemyHeight, screenWidth, screenHeight;
 public:
 	Gra();
 	~Gra();
@@ -32,6 +33,7 @@ public:
 	std::shared_ptr<SDL_Texture> background_texture;
 	std::shared_ptr<SDL_Texture> player_texture;
 	std::shared_ptr<SDL_Texture> enemy_texture;
+	std::shared_ptr<SDL_Texture> loose_texture;
 	std::shared_ptr<SDL_Texture> initText(std::string text);
 	std::shared_ptr<TTF_Font> initFont(std::string fontName);
 	void addEnemies();

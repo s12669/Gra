@@ -12,11 +12,16 @@ Gra::Gra()
 	background_texture = create_texture("resources/Ulica.bmp");
 	player_texture = create_texture("resources/Gracz.bmp");
 	enemy_texture = create_texture("resources/Przeciwnik.bmp" , true, 255, 255, 0);
+	loose_texture = create_texture("resources/Przegrana.bmp", true, 255, 255, 255);
 	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.0 }, { 0.0,0.0 });
 	fizykabg.velocity[1] = 0.007;
 	fizykabg.acceleration[1] = 0.0004;
+	screenWidth = 800;
+	screenHeight = 600;
 	playerX = current_lane * 160 + 20;
 	playerY = 600 - 120 - 20;
+	enemyWidth = 120;
+	enemyHeight = 200;
 	start();
 }
 
@@ -61,7 +66,7 @@ void Gra::start() {
 		drawEnemies();
 
 		drawPoints();
-
+		//rekalkulacja pozycji przy poruszaniu
 		playerX = current_lane * 160 + 20;
 		SDL_Rect player_position = { playerX, playerY, playerSize, playerSize};
 		SDL_RenderCopy(renderer.get(), player_texture.get(), NULL, &player_position);
@@ -69,6 +74,23 @@ void Gra::start() {
 		SDL_RenderPresent(renderer.get());
 		SDL_Delay(1);
 		last_render = current_render;
+	}
+
+	SDL_Rect loosePosition = { 100, 75, 600, 450 };
+	SDL_RenderCopy(renderer.get(), loose_texture.get(), NULL, &loosePosition);
+
+	SDL_RenderPresent(renderer.get());
+
+	bool beMean = true;
+	while (beMean)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_KEYDOWN)
+			{
+				beMean = false;
+			}
+		}
 	}
 }
 
@@ -100,10 +122,10 @@ void Gra::removeEnemies() {
 }
 
 void Gra::drawEnemies() {
-	SDL_Rect player_position = { current_lane * 160 + 20, 600 - 140, 120, 120 };
+	SDL_Rect player_position = { playerX, playerY, playerSize, playerSize };
 	std::list<Przeciwnik>::iterator enemy = enemies.begin();
 	while (enemy != enemies.end()) {
-		player_position = { (int)enemy->position[0], (int)enemy->position[1], 120, 200 };
+		player_position = { (int)enemy->position[0], (int)enemy->position[1], enemyWidth, enemyHeight };
 		SDL_RenderCopy(renderer.get(), enemy->texture, NULL, &player_position);
 		enemy++;
 	}
