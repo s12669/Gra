@@ -41,7 +41,7 @@ void Gra::start() {
 			{
 				switch (event.key.keysym.sym) {
 				case SDLK_RIGHT:
-					if (currentLane < 4)
+					if (currentLane < maxLanes - 1)
 						currentLane++;
 					break;
 				case SDLK_LEFT:
