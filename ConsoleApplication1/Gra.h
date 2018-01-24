@@ -19,6 +19,7 @@ private:
 	int enemyRespawnTime = 800;
 	int lastEnemySpawn = 0;
 	int score=0;
+	int laneWidth = 160, playerX = 0, playerY = 0, playerSize = 120;
 public:
 	Gra();
 	~Gra();
@@ -38,5 +39,7 @@ public:
 	void drawEnemies();
 	void animateBg();
 	void drawPoints();
+	bool szukajKolizji();
+	bool kolizja(Przeciwnik* obj1);
 };
 

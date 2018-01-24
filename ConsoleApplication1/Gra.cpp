@@ -15,6 +15,8 @@ Gra::Gra()
 	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.0 }, { 0.0,0.0 });
 	fizykabg.velocity[1] = 0.007;
 	fizykabg.acceleration[1] = 0.0004;
+	playerX = current_lane * 160 + 20;
+	playerY = 600 - 120 - 20;
 	start();
 }
 
@@ -52,13 +54,16 @@ void Gra::start() {
 		// func do usuwanie przeciwnikow
 		removeEnemies();
 		//wykrywanie kolizji
-
+		if (szukajKolizji()) {
+			Graj = false;
+		}
 		//rysowanie przeciwnikow
 		drawEnemies();
 
 		drawPoints();
 
-		SDL_Rect player_position = { current_lane* 160 + 20, 600- 140, 120, 120};
+		playerX = current_lane * 160 + 20;
+		SDL_Rect player_position = { playerX, playerY, playerSize, playerSize};
 		SDL_RenderCopy(renderer.get(), player_texture.get(), NULL, &player_position);
 
 		SDL_RenderPresent(renderer.get());
@@ -154,6 +159,27 @@ std::shared_ptr< TTF_Font > Gra::initFont(std::string fontName) {
 	});
 
 	return font;
+}
+
+bool Gra::szukajKolizji() {
+	bool result = false;
+	std::list<Przeciwnik>::iterator enemy = enemies.begin();
+	while (enemy != enemies.end()) {
+		if (kolizja(&(*enemy))) {
+			result = true;
+		}
+		enemy++;
+	}
+	return result;
+}
+
+bool Gra::kolizja(Przeciwnik* obj1)
+{	//SDL_Rect player_position = { current_lane* 160 + 20, 600- 140, 120, 120};
+	bool colision = false;
+	if (obj1->position[1] <= 600 - 140 + 120 && obj1->position[1] + 200 >= 600 - 140)
+		if (obj1->position[0] <= current_lane * 160 + 20 + 120 && obj1->position[0] + 120 >= current_lane * 160 + 20)
+			colision = true;
+	return colision;
 }
 
 std::shared_ptr<SDL_Window> Gra::init_window(const int width = 800, const int height = 600) {
