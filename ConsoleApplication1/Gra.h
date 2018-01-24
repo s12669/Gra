@@ -45,9 +45,7 @@ public:
 	std::shared_ptr<SDL_Texture> playerTexture;
 	std::shared_ptr<SDL_Texture> enemyTexture;
 	std::shared_ptr<SDL_Texture> loseTexture;
-	std::shared_ptr<SDL_Texture> initText(std::string text);
-	//std::shared_ptr<TTF_Font> initFont(std::string fontName);
-	std::shared_ptr<TTF_Font> initFont(const char *fontName, int size);
+	std::list<std::shared_ptr<SDL_Texture>> points;
 	void addEnemies();
 	void removeEnemies();
 	void drawEnemies();

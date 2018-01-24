@@ -19,6 +19,11 @@ Gra::Gra()
 	playerY = screenHeight - playerSize - padding;
 	enemyWidth = 120;
 	enemyHeight = 200;
+
+	for (int i = 0; i <= 9; i++) {
+		points.push_back(createTexture("text/" + std::to_string(i) + ".bmp", true));
+	}
+
 	start();
 }
 
@@ -112,6 +117,8 @@ void Gra::removeEnemies() {
 	while (enemy != enemies.end()) {
 		if (enemy->position[1] > 600 + 140) {
 			score++;
+			enemyRespawnTime -= 10;
+			if (enemyRespawnTime < 100) enemyRespawnTime = 100;
 			enemy = enemies.erase(enemy);
 		}
 		else {
@@ -147,54 +154,28 @@ void Gra::animateBg() {
 }
 
 void Gra::drawPoints() {
-	SDL_Rect dst_bg = { 0, 0, 100,  20};
-	std::shared_ptr< SDL_Texture > napis = initText("Punkty:" + std::to_string(score));
-	SDL_RenderCopy(this->renderer.get(), napis.get(), NULL, &dst_bg);
+	SDL_Rect size;
+
+	int pointWidth = 10, pointHeight = 20;
+
+	int innerScore = score;
+	std::list<int> pointsList;
+	do {
+		pointsList.push_front(innerScore % 10);
+		innerScore /= 10;
+	} while (innerScore > 0);
+	std::list<int>::iterator pointsIterate = pointsList.begin();
+	std::list<std::shared_ptr<SDL_Texture>>::iterator number = points.begin();
+	for (int i = 0; pointsIterate != pointsList.end(); pointsIterate++, i++) {
+		number = points.begin();
+		std::advance(number, *pointsIterate);
+		int positionX = i*pointWidth;
+		int positionY = 0;
+		size = { positionX, positionY, pointWidth, pointHeight };
+		SDL_RenderCopy(renderer.get(), number->get(), NULL, &size);
+	}
 }
 
-// tworzenie tekstu (wzorowane na http://lazyfoo.net/tutorials/SDL/16_true_type_fonts/index.php)
-std::shared_ptr< SDL_Texture > Gra::initText(std::string text) {
-
-	SDL_Color color = { 255, 0, 161 };
-	auto font = initFont("fonts/uni.ttf", 20);
-
-	SDL_Surface *surface = TTF_RenderText_Solid(font.get(), text.c_str(), color);
-	SDL_Texture *t = SDL_CreateTextureFromSurface(renderer.get(), surface);
-
-	std::shared_ptr< SDL_Texture > texture(t, [](SDL_Texture * ptr) {
-		SDL_DestroyTexture(ptr);
-		ptr = NULL;
-	});
-	SDL_FreeSurface(surface);
-
-	return texture;
-}
-
-//// tworzenie fontu
-//std::shared_ptr< TTF_Font > Gra::initFont(std::string fontName) {
-//
-//	TTF_Font *f = TTF_OpenFont(fontName.c_str(), 20);
-//
-//	std::shared_ptr< TTF_Font > font(f, [](TTF_Font * ptr) {
-//		TTF_CloseFont(ptr);
-//		ptr = NULL;
-//	});
-//
-//	return font;
-//}
-
-// tworzenie fontu
-std::shared_ptr< TTF_Font > Gra::initFont(const char *fontName, int size) {
-
-	TTF_Font *f = TTF_OpenFont(fontName, size);
-
-	std::shared_ptr< TTF_Font > font(f, [](TTF_Font * ptr) {
-		TTF_CloseFont(ptr);
-		ptr = NULL;
-	});
-
-	return font;
-}
 
 bool Gra::szukajKolizji() {
 	bool result = false;
