@@ -14,8 +14,9 @@ Gra::Gra()
 	fizykabg.acceleration[1] = 0.0004;
 	screenWidth = 800;
 	screenHeight = 600;
-	playerX = currentLane * 160 + 20;
-	playerY = 600 - 120 - 20;
+	padding = 20;
+	playerX = currentLane * laneWidth + padding;
+	playerY = screenHeight - playerSize - padding;
 	enemyWidth = 120;
 	enemyHeight = 200;
 	start();
@@ -63,7 +64,7 @@ void Gra::start() {
 
 		drawPoints();
 		//rekalkulacja pozycji przy poruszaniu
-		playerX = currentLane * 160 + 20;
+		playerX = currentLane * laneWidth + padding;
 		SDL_Rect playerPosition = { playerX, playerY, playerSize, playerSize};
 		SDL_RenderCopy(renderer.get(), playerTexture.get(), NULL, &playerPosition);
 
@@ -73,19 +74,19 @@ void Gra::start() {
 	}
 
 	if (Graj == Lost) {
-		SDL_Rect loosePosition = { 100, 75, 600, 450 };
-		SDL_RenderCopy(renderer.get(), loseTexture.get(), NULL, &loosePosition);
-
+		SDL_Rect losePosition = { 100, 75, 600, 450 };
+		SDL_RenderCopy(renderer.get(), loseTexture.get(), NULL, &losePosition);
+		drawPoints();
 		SDL_RenderPresent(renderer.get());
 
-		bool beMean = true;
-		while (beMean)
+		bool keyPressed = false;
+		while (!keyPressed)
 		{
 			while (SDL_PollEvent(&event))
 			{
 				if (event.type == SDL_KEYDOWN)
 				{
-					beMean = false;
+					keyPressed = true;
 				}
 			}
 		}
