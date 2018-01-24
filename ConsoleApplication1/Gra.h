@@ -27,11 +27,12 @@ private:
 	std::list<Przeciwnik> enemies;
 	int lastRender, currentRender;
 	Fizykabg fizykabg;
-	int enemyRespawnTime = 800;
-	int lastEnemySpawn = 0;
-	int score=0;
-	int laneWidth = 160, playerX = 0, playerY = 0, playerSize = 120;
+	int enemyRespawnTime;
+	int lastEnemySpawn;
+	int score;
+	int laneWidth, playerX, playerY, playerSize;
 	int enemyWidth, enemyHeight, screenWidth, screenHeight, padding;
+	double speed;
 public:
 	Gra();
 	~Gra();

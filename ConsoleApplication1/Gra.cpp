@@ -5,21 +5,33 @@ Gra::Gra()
 {
 	window = initWindow(800,600);
 	renderer = initRenderer(window);
+	//³adowanie tekstur
 	backgroundTexture = createTexture("resources/Ulica.bmp");
 	playerTexture = createTexture("resources/Gracz.bmp");
 	enemyTexture = createTexture("resources/Przeciwnik.bmp" , true, 255, 255, 0);
 	loseTexture = createTexture("resources/Przegrana.bmp", true, 255, 255, 255);
+	//fizyka t³a
 	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.0 }, { 0.0,0.0 });
-	fizykabg.velocity[1] = 0.007;
-	fizykabg.acceleration[1] = 0.0004;
+	//prêdkoœæ t³a pionowa
+	fizykabg.velocity[1] = 0.002;
+	//pionowe przyspieszenie t³a
+	fizykabg.acceleration[1] = 0.0001;
 	screenWidth = 800;
 	screenHeight = 600;
+	laneWidth = 160;
+	maxLanes = 5;
+	currentLane = 2;
+	playerSize = 120;
 	padding = 20;
+	//pozycja gracza
 	playerX = currentLane * laneWidth + padding;
 	playerY = screenHeight - playerSize - padding;
+	score = 0;
 	enemyWidth = 120;
 	enemyHeight = 200;
-
+	enemyRespawnTime = 800;
+	lastEnemySpawn = 0;
+	speed = 0.005;
 	TTF_Init();
 
 	start();
@@ -53,6 +65,7 @@ void Gra::start() {
 			}
 		}
 		SDL_RenderClear(renderer.get());
+		//animacja t³a
 		animateBg();
 		// func do robienie przeciwnikow
 		addEnemies();
@@ -68,9 +81,10 @@ void Gra::start() {
 		drawPoints();
 		//rekalkulacja pozycji przy poruszaniu
 		playerX = currentLane * laneWidth + padding;
+		//render gracza
 		SDL_Rect playerPosition = { playerX, playerY, playerSize, playerSize};
 		SDL_RenderCopy(renderer.get(), playerTexture.get(), NULL, &playerPosition);
-
+		//wyœwietlanie wyrenderowanego obrazu
 		SDL_RenderPresent(renderer.get());
 		SDL_Delay(1);
 		lastRender = currentRender;
@@ -98,21 +112,25 @@ void Gra::start() {
 }
 
 void Gra::addEnemies() {
+	//losowe generowanie liczb - rozwi¹zanie ze stacka (komenty te¿)
 	std::random_device rd; // obtain a random number from hardware
 	std::mt19937 eng(rd()); // seed the generator
 	std::uniform_int_distribution<> distr(0, 4); // define the range
 
 	if (enemies.size() < 7 && lastEnemySpawn + enemyRespawnTime < currentRender) {
 		int lane = distr(eng);
-		Przeciwnik p = Przeciwnik({ (double)160* lane + 20, -260.0 }, {0.0, 0.002}, {0.0,0.0003}, enemyTexture.get());
+		//tworzenie przeciwnika, ({pozycja},{prêdkoœæ},{przyspieszenie}, tekstura)
+		Przeciwnik p = Przeciwnik({ (double)160* lane + 20, -260.0 }, {0.0, speed}, {0.0,0.00015}, enemyTexture.get());
 		enemies.push_back(p);
 		lastEnemySpawn = currentRender;
+		speed += 0.005;
 	}
 }
 
 void Gra::removeEnemies() {
 	std::list<Przeciwnik>::iterator enemy = enemies.begin();
 	while (enemy != enemies.end()) {
+		//je¿eli przeciwnik jest poni¿ej dolnej linii ekranu to usuwa go i dodaje punkt
 		if (enemy->position[1] > 600 + 140) {
 			score++;
 			enemyRespawnTime -= 10;
@@ -120,12 +138,13 @@ void Gra::removeEnemies() {
 			enemy = enemies.erase(enemy);
 		}
 		else {
+			//poruszanie siê przeciwnika je¿eli nadal znajduje siê na ekranie
 			enemy->move(currentRender - lastRender);
 			enemy++;
 		}
 	}
 }
-
+//rysowanie przeciwników
 void Gra::drawEnemies() {
 	SDL_Rect player_position = { playerX, playerY, playerSize, playerSize };
 	std::list<Przeciwnik>::iterator enemy = enemies.begin();
@@ -135,16 +154,17 @@ void Gra::drawEnemies() {
 		enemy++;
 	}
 }
-
+//animacja t³a
 void Gra::animateBg() {
 	int screen_width = 800, screen_height = 600;
 	fizykabg.move(currentRender - lastRender);
+	// wyzerowanie przyspieszenia dla pewnej wartoœci prêdkoœci => ustawia to max prêdkoœæ
 	if (fizykabg.velocity[1] > 1.1) {
 		fizykabg.acceleration[1] = 0;
 	}
-	SDL_RenderCopy(renderer.get(), backgroundTexture.get(), NULL, NULL);
 	if ((int)fizykabg.position[1] >= screen_height)
 		fizykabg.position[1] = 0.0;
+	//renderowanie dwóch te³ tak, ¿eby wygl¹da³o, ¿e siê rusza
 	SDL_Rect dst_bg = { 0, (int)fizykabg.position[1] - screen_height, screen_width, screen_height };
 	SDL_RenderCopy(renderer.get(), backgroundTexture.get(), NULL, &dst_bg);
 	SDL_Rect dst_bg2 = { 0, (int)fizykabg.position[1], screen_width, screen_height };
@@ -161,7 +181,7 @@ void Gra::drawPoints() {
 std::shared_ptr< SDL_Texture > Gra::initText(std::string text) {
 
 	SDL_Color color = { 255, 0, 161 };
-	auto font = initFont("fonts/uni.ttf", 20);
+	auto font = initFont("fonts/czcionka.ttf", 20);
 
 	SDL_Surface *surface = TTF_RenderText_Solid(font.get(), text.c_str(), color);
 	SDL_Texture *t = SDL_CreateTextureFromSurface(renderer.get(), surface);
@@ -174,19 +194,6 @@ std::shared_ptr< SDL_Texture > Gra::initText(std::string text) {
 
 	return texture;
 }
-
-//// tworzenie fontu
-//std::shared_ptr< TTF_Font > Gra::initFont(std::string fontName) {
-//
-//	TTF_Font *f = TTF_OpenFont(fontName.c_str(), 20);
-//
-//	std::shared_ptr< TTF_Font > font(f, [](TTF_Font * ptr) {
-//		TTF_CloseFont(ptr);
-//		ptr = NULL;
-//	});
-//
-//	return font;
-//}
 
 // tworzenie fontu
 std::shared_ptr< TTF_Font > Gra::initFont(const char *fontName, int size) {
@@ -201,7 +208,6 @@ std::shared_ptr< TTF_Font > Gra::initFont(const char *fontName, int size) {
 	return font;
 }
 
-
 bool Gra::szukajKolizji() {
 	bool result = false;
 	std::list<Przeciwnik>::iterator enemy = enemies.begin();
@@ -215,8 +221,9 @@ bool Gra::szukajKolizji() {
 }
 
 bool Gra::kolizja(Przeciwnik* obj1)
-{	//SDL_Rect player_position = { current_lane* 160 + 20, 600- 140, 120, 120};
+{
 	bool colision = false;
+	// sprawdzanie czy obiekty na siebie nie nachodz¹
 	if (obj1->position[1] <= 600 - 140 + 120 && obj1->position[1] + 200 >= 600 - 140)
 		if (obj1->position[0] <= currentLane * 160 + 20 + 120 && obj1->position[0] + 120 >= currentLane * 160 + 20)
 			colision = true;
