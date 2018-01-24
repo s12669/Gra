@@ -1,4 +1,4 @@
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "Gra.h"
 
 Gra::Gra()
@@ -19,7 +19,9 @@ Gra::Gra()
 	playerY = screenHeight - playerSize - padding;
 	enemyWidth = 120;
 	enemyHeight = 200;
+
 	TTF_Init();
+
 	start();
 }
 
@@ -37,7 +39,7 @@ void Gra::start() {
 			{
 				switch (event.key.keysym.sym) {
 				case SDLK_RIGHT:
-					if (currentLane < 4)
+					if (currentLane < maxLanes - 1)
 						currentLane++;
 					break;
 				case SDLK_LEFT:
@@ -113,6 +115,8 @@ void Gra::removeEnemies() {
 	while (enemy != enemies.end()) {
 		if (enemy->position[1] > 600 + 140) {
 			score++;
+			enemyRespawnTime -= 10;
+			if (enemyRespawnTime < 100) enemyRespawnTime = 100;
 			enemy = enemies.erase(enemy);
 		}
 		else {
@@ -148,7 +152,7 @@ void Gra::animateBg() {
 }
 
 void Gra::drawPoints() {
-	SDL_Rect dst_bg = { 0, 0, 100,  20};
+	SDL_Rect dst_bg = { 0, 0, 100,  20 };
 	std::shared_ptr< SDL_Texture > napis = initText("Punkty:" + std::to_string(score));
 	SDL_RenderCopy(this->renderer.get(), napis.get(), NULL, &dst_bg);
 }
@@ -196,6 +200,7 @@ std::shared_ptr< TTF_Font > Gra::initFont(const char *fontName, int size) {
 
 	return font;
 }
+
 
 bool Gra::szukajKolizji() {
 	bool result = false;
