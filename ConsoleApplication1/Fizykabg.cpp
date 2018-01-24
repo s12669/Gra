@@ -9,6 +9,13 @@ Fizykabg::Fizykabg(pos_t pos, pos_t vel, pos_t acc)
 	acceleration = acc;
 }
 
+Fizykabg::Fizykabg()
+{
+	position = { 0.0,0.0 };
+	velocity = { 0.0,0.0 };
+	acceleration = { 0.0,0.0 };
+}
+
 void Fizykabg::move(int dt)
 {
 	velocity = (velocity + acceleration * dt);

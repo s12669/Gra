@@ -11,7 +11,9 @@ Gra::Gra()
 	background_texture = create_texture("resources/Ulica.bmp");
 	player_texture = create_texture("resources/Gracz.bmp");
 	enemy_texture = create_texture("resources/Przeciwnik.bmp");
+	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.0 }, { 0.0,0.0 });
 	fizykabg.velocity[1] = 0.007;
+	fizykabg.acceleration[1] = 0.0004;
 	start();
 }
 
@@ -100,6 +102,9 @@ void Gra::drawEnemies() {
 void Gra::animateBg() {
 	int screen_width = 800, screen_height = 600;
 	fizykabg.move(current_render - last_render);
+	if (fizykabg.velocity[1] > 1.1) {
+		fizykabg.acceleration[1] = 0;
+	}
 	SDL_RenderCopy(renderer.get(), background_texture.get(), NULL, NULL);
 	if ((int)fizykabg.position[1] >= screen_height)
 		fizykabg.position[1] = 0.0;
