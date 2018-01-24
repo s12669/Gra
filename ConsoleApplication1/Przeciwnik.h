@@ -1,6 +1,10 @@
 #pragma once
 #include <array>
+#ifdef _WIN32
 #include <SDL.h>
+#else
+#include <SDL2/SDL.h>
+#endif
 using pos_t = std::array<double, 2>;
 
 inline pos_t operator +(const pos_t &a, const pos_t &b) {

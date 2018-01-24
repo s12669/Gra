@@ -1,20 +1,31 @@
 #pragma once
-#include <string>
 #include <memory>
-#include <SDL.h>
+#include <string>
+#include <random>
 #include <SDL_ttf.h>
 #include "Przeciwnik.h"
 #include <list>
 #include "Fizykabg.h"
+#ifdef _WIN32
+#include <SDL.h>
+#else
+#include <SDL2/SDL.h>
+#endif
+
+enum StanGry {
+	Ongoing,
+	Lost,
+	End
+};
 class Gra
 {
 private:
 	std::shared_ptr<SDL_Window> window;
 	std::shared_ptr<SDL_Renderer> renderer;
-	int current_lane=2;
-	int max_lanes=5;
+	int currentLane=2;
+	int maxLanes=5;
 	std::list<Przeciwnik> enemies;
-	int last_render, current_render;
+	int lastRender, currentRender;
 	Fizykabg fizykabg;
 	int enemyRespawnTime = 800;
 	int lastEnemySpawn = 0;
@@ -25,17 +36,18 @@ public:
 	Gra();
 	~Gra();
 	void start();
-	std::shared_ptr<SDL_Window> init_window(int width, int height);
-	std::shared_ptr<SDL_Renderer> init_renderer(std::shared_ptr<SDL_Window> window);
-	std::shared_ptr<SDL_Texture> create_texture(std::string resource_path, bool apply_alpha = false, int r = 0, int g = 255, int b = 0);
+	std::shared_ptr<SDL_Window> initWindow(int width, int height);
+	std::shared_ptr<SDL_Renderer> initRenderer(std::shared_ptr<SDL_Window> window);
+	std::shared_ptr<SDL_Texture> createTexture(std::string resource_path, bool apply_alpha = false, int r = 0, int g = 255, int b = 0);
 	void errthrow(const std::string &e);
-	std::shared_ptr<SDL_Surface> create_surface(std::string file_name);
-	std::shared_ptr<SDL_Texture> background_texture;
-	std::shared_ptr<SDL_Texture> player_texture;
-	std::shared_ptr<SDL_Texture> enemy_texture;
-	std::shared_ptr<SDL_Texture> loose_texture;
+	std::shared_ptr<SDL_Surface> createSurface(std::string file_name);
+	std::shared_ptr<SDL_Texture> backgroundTexture;
+	std::shared_ptr<SDL_Texture> playerTexture;
+	std::shared_ptr<SDL_Texture> enemyTexture;
+	std::shared_ptr<SDL_Texture> loseTexture;
 	std::shared_ptr<SDL_Texture> initText(std::string text);
-	std::shared_ptr<TTF_Font> initFont(std::string fontName);
+	//std::shared_ptr<TTF_Font> initFont(std::string fontName);
+	std::shared_ptr<TTF_Font> initFont(const char *fontName, int size);
 	void addEnemies();
 	void removeEnemies();
 	void drawEnemies();
