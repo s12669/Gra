@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <memory>
 #include <string>
-
+#include <random>
 Gra::Gra()
 {
 	window = init_window(800,600);
@@ -11,6 +11,7 @@ Gra::Gra()
 	background_texture = create_texture("resources/Ulica.bmp");
 	player_texture = create_texture("resources/Gracz.bmp");
 	enemy_texture = create_texture("resources/Przeciwnik.bmp");
+	fizykabg.velocity[1] = 0.007;
 	start();
 }
 
@@ -42,7 +43,7 @@ void Gra::start() {
 			}
 		}
 		SDL_RenderClear(renderer.get());
-		SDL_RenderCopy(renderer.get(), background_texture.get(), NULL, NULL);
+		animateBg();
 		// func do robienie przeciwnikow
 		addEnemies();
 		// func do usuwanie przeciwnikow
@@ -62,9 +63,13 @@ void Gra::start() {
 }
 
 void Gra::addEnemies() {
+	std::random_device rd; // obtain a random number from hardware
+	std::mt19937 eng(rd()); // seed the generator
+	std::uniform_int_distribution<> distr(0, 4); // define the range
+
 	if (enemies.empty()) {
-		int lane = 1;
-		Przeciwnik p = Przeciwnik({ (double)160* lane + 20, -20.0 }, {0.0, 0.002}, {0.0,0.0003}, enemy_texture.get());
+		int lane = distr(eng);
+		Przeciwnik p = Przeciwnik({ (double)160* lane + 20, -220.0 }, {0.0, 0.002}, {0.0,0.0003}, enemy_texture.get());
 		enemies.push_back(p);
 	}
 }
@@ -90,6 +95,18 @@ void Gra::drawEnemies() {
 		SDL_RenderCopy(renderer.get(), enemy->texture, NULL, &player_position);
 		enemy++;
 	}
+}
+
+void Gra::animateBg() {
+	int screen_width = 800, screen_height = 600;
+	fizykabg.move(current_render - last_render);
+	SDL_RenderCopy(renderer.get(), background_texture.get(), NULL, NULL);
+	if ((int)fizykabg.position[1] >= screen_height)
+		fizykabg.position[1] = 0.0;
+	SDL_Rect dst_bg = { 0, (int)fizykabg.position[1] - screen_height, screen_width, screen_height };
+	SDL_RenderCopy(renderer.get(), background_texture.get(), NULL, &dst_bg);
+	SDL_Rect dst_bg2 = { 0, (int)fizykabg.position[1], screen_width, screen_height };
+	SDL_RenderCopy(renderer.get(), background_texture.get(), NULL, &dst_bg2);
 }
 
 std::shared_ptr<SDL_Window> Gra::init_window(const int width = 800, const int height = 600) {

@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include "Przeciwnik.h"
 #include <list>
-
+#include "Fizykabg.h"
 class Gra
 {
 private:
@@ -14,6 +14,7 @@ private:
 	int max_lanes=5;
 	std::list<Przeciwnik> enemies;
 	int last_render, current_render;
+	Fizykabg fizykabg;
 public:
 	Gra();
 	~Gra();
@@ -29,5 +30,6 @@ public:
 	void addEnemies();
 	void removeEnemies();
 	void drawEnemies();
+	void animateBg();
 };
 

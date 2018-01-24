@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Fizykabg.h" />
     <ClInclude Include="Gra.h" />
     <ClInclude Include="Przeciwnik.h" />
     <ClInclude Include="stdafx.h" />
@@ -157,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleApplication1.cpp" />
+    <ClCompile Include="Fizykabg.cpp" />
     <ClCompile Include="Gra.cpp" />
     <ClCompile Include="Przeciwnik.cpp" />
     <ClCompile Include="stdafx.cpp">
