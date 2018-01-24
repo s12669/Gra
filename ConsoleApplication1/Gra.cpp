@@ -19,6 +19,7 @@ Gra::Gra()
 	playerY = screenHeight - playerSize - padding;
 	enemyWidth = 120;
 	enemyHeight = 200;
+	TTF_Init();
 	start();
 }
 
@@ -272,4 +273,5 @@ std::shared_ptr<SDL_Surface> Gra::createSurface(std::string file_name) {
 
 Gra::~Gra()
 {
+	TTF_Quit();
 }
