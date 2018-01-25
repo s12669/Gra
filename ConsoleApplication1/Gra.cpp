@@ -1,4 +1,3 @@
-//#include "stdafx.h"
 #include "Gra.h"
 
 Gra::Gra()
@@ -20,8 +19,9 @@ Gra::Gra()
 	currentLane = 2;
 	playerSize = 105;
 	enemyPadding = 20;
+	playerPaddingX = 28;
 	//pozycja gracza
-	playerX = currentLane * laneWidth + 28;
+	playerX = currentLane * laneWidth + playerPaddingX;
 	playerY = screenHeight - playerSize - 33;
 	score = 0;
 	enemyWidth = 120;
@@ -34,7 +34,7 @@ Gra::Gra()
 }
 
 void Gra::start() {
-	StanGry Graj = StanGry::Ongoing;
+	Graj = StanGry::Ongoing;
 	SDL_Event event;
 	lastRender = SDL_GetTicks();
 	currentRender = SDL_GetTicks();
@@ -76,7 +76,7 @@ void Gra::start() {
 		//wypisywanie punktów
 		drawPoints();
 		//rekalkulacja pozycji przy poruszaniu
-		playerX = currentLane * laneWidth + 28;
+		playerX = currentLane * laneWidth + playerPaddingX;
 		//render gracza
 		SDL_Rect playerPosition = { playerX, playerY, playerSize, playerSize};
 		SDL_RenderCopy(renderer.get(), playerTexture.get(), NULL, &playerPosition);
@@ -84,27 +84,46 @@ void Gra::start() {
 		SDL_RenderPresent(renderer.get());
 		SDL_Delay(10);
 		lastRender = currentRender;
-	}
 
-	if (Graj == Lost) {
-		SDL_Rect losePosition = { 100, 75, 600, 450 };
-		SDL_RenderCopy(renderer.get(), loseTexture.get(), NULL, &losePosition);
-		drawPoints();
-		SDL_RenderPresent(renderer.get());
+		//------------------------
 
-		bool keyPressed = false;
-		while (!keyPressed)
-		{
-			while (SDL_PollEvent(&event))
+		if (Graj == Lost) {
+			SDL_Rect losePosition = { 100, 75, 600, 450 };
+			SDL_RenderCopy(renderer.get(), loseTexture.get(), NULL, &losePosition);
+			drawPoints();
+			SDL_RenderPresent(renderer.get());
+
+			bool keyPressed = false;
+			while (!keyPressed)
 			{
-				if (event.type == SDL_KEYDOWN)
+				while (SDL_PollEvent(&event))
 				{
-					keyPressed = true;
+					if (event.type == SDL_KEYDOWN)
+					{
+						switch (event.key.keysym.sym) {
+						case SDLK_SPACE:
+							keyPressed = true;
+							restartGame();
+							break;
+						case SDLK_ESCAPE:
+							Graj = End;
+							keyPressed = true;
+							break;
+						}
+					}
 				}
 			}
 		}
-	}
-	
+	}	
+}
+
+void Gra::restartGame() {
+	Graj = Ongoing;
+	enemies.clear();
+	score = 0;
+	currentLane = 2;
+	speed = 0.05;
+	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.002 }, { 0.0,0.00005 });
 }
 
 void Gra::addEnemies() {
@@ -142,11 +161,11 @@ void Gra::removeEnemies() {
 }
 //rysowanie przeciwników
 void Gra::drawEnemies() {
-	SDL_Rect playerPosition = { playerX, playerY, playerSize, playerSize };
+	SDL_Rect enemyPosition = { playerX, playerY, playerSize, playerSize };
 	std::list<Przeciwnik>::iterator enemy = enemies.begin();
 	while (enemy != enemies.end()) {
-		playerPosition = { (int)enemy->position[0], (int)enemy->position[1], enemyWidth, enemyHeight };
-		SDL_RenderCopy(renderer.get(), enemy->texture, NULL, &playerPosition);
+		enemyPosition = { (int)enemy->position[0], (int)enemy->position[1], enemyWidth, enemyHeight };
+		SDL_RenderCopy(renderer.get(), enemy->texture, NULL, &enemyPosition);
 		enemy++;
 	}
 }
@@ -221,8 +240,8 @@ bool Gra::kolizja(Przeciwnik* przeciwnik)
 {
 	bool colision = false;
 	// sprawdzanie czy obiekty na siebie nie nachodz¹
-	if (przeciwnik->position[1] <= screenHeight - 140 + 120 && przeciwnik->position[1] + enemyHeight >= screenHeight - 140)
-		if (przeciwnik->position[0] <= currentLane * laneWidth + enemyPadding + enemyWidth && przeciwnik->position[0] + enemyWidth >= currentLane * laneWidth + enemyPadding)
+	if (przeciwnik->position[1] <= screenHeight - playerPaddingX && przeciwnik->position[1] + enemyHeight >= screenHeight - playerPaddingX - playerSize)
+		if (przeciwnik->position[0] <= currentLane * laneWidth + playerPaddingX + enemyWidth && przeciwnik->position[0] + enemyWidth >= currentLane * laneWidth + playerPaddingX)
 			colision = true;
 	return colision;
 }
@@ -237,7 +256,7 @@ std::shared_ptr<SDL_Window> Gra::initWindow(const int width = 800, const int hei
 	std::shared_ptr<SDL_Window> window(win, [](SDL_Window * ptr) {
 		SDL_DestroyWindow(ptr);
 	});
-	return window;
+	return window; 
 }
 //inicjalizacja renderera
 std::shared_ptr<SDL_Renderer> Gra::initRenderer(std::shared_ptr<SDL_Window> window) {
@@ -255,7 +274,7 @@ void Gra::errthrow(const std::string &e) {
 	throw std::runtime_error(errstr);
 };
 //tworzenie tekstur
-std::shared_ptr<SDL_Texture> Gra::createTexture(std::string resource_path, bool apply_alpha /*false*/, int r /*0*/, int g /*255*/, int b /*0*/)
+std::shared_ptr<SDL_Texture> Gra::createTexture(std::string resource_path, bool apply_alpha, int r, int g, int b)
 {
 	std::shared_ptr<SDL_Surface> surface = createSurface(resource_path);
 	if (apply_alpha)

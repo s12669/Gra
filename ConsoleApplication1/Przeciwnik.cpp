@@ -1,6 +1,4 @@
-//#include "stdafx.h"
 #include "Przeciwnik.h"
-
 
 Przeciwnik::Przeciwnik(pos_t pos, pos_t vel , pos_t acc, SDL_Texture* text)
 {

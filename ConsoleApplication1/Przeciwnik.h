@@ -5,7 +5,7 @@
 #else
 #include <SDL2/SDL.h>
 #endif
-using pos_t = std::array<double, 2>;
+using pos_t = std::array<double, 2>; 
 
 inline pos_t operator +(const pos_t &a, const pos_t &b) {
 	return { a[0] + b[0], a[1] + b[1] };

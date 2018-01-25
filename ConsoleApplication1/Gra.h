@@ -22,8 +22,8 @@ class Gra
 private:
 	std::shared_ptr<SDL_Window> window;
 	std::shared_ptr<SDL_Renderer> renderer;
-	int currentLane=2;
-	int maxLanes=5;
+	int currentLane;
+	int maxLanes;
 	std::list<Przeciwnik> enemies;
 	int lastRender, currentRender;
 	Fizykabg fizykabg;
@@ -31,8 +31,9 @@ private:
 	int lastEnemySpawn;
 	int score;
 	int laneWidth, playerX, playerY, playerSize;
-	int enemyWidth, enemyHeight, screenWidth, screenHeight, enemyPadding;
+	int enemyWidth, enemyHeight, screenWidth, screenHeight, enemyPadding, playerPaddingX;
 	double speed;
+	StanGry Graj;
 public:
 	Gra();
 	~Gra();
@@ -55,5 +56,6 @@ public:
 	void drawPoints();
 	bool szukajKolizji();
 	bool kolizja(Przeciwnik* przeciwnik);
+	void restartGame();
 };
 
