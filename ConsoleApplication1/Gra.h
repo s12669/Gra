@@ -31,7 +31,7 @@ private:
 	int lastEnemySpawn;
 	int score;
 	int laneWidth, playerX, playerY, playerSize;
-	int enemyWidth, enemyHeight, screenWidth, screenHeight, padding;
+	int enemyWidth, enemyHeight, screenWidth, screenHeight, enemyPadding;
 	double speed;
 public:
 	Gra();
@@ -54,6 +54,6 @@ public:
 	void animateBg();
 	void drawPoints();
 	bool szukajKolizji();
-	bool kolizja(Przeciwnik* obj1);
+	bool kolizja(Przeciwnik* przeciwnik);
 };
 
