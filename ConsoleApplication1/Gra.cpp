@@ -11,7 +11,7 @@ Gra::Gra()
 	enemyTexture = createTexture("resources/Przeciwnik2.bmp" , true, 255, 255, 255);
 	loseTexture = createTexture("resources/Przegrana2.bmp", true, 255, 255, 255);
 	//fizyka t³a (pozycja, prêdkoœæ, przyspieszenie)
-	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.002 }, { 0.0,0.00005 });
+	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.002 }, { 0.0,0.00002 });
 	screenWidth = 800;
 	screenHeight = 600;
 	laneWidth = 160;
@@ -20,9 +20,10 @@ Gra::Gra()
 	playerSize = 105;
 	enemyPadding = 20;
 	playerPaddingX = 28;
+	playerPaddingY = 33;
 	//pozycja gracza
 	playerX = currentLane * laneWidth + playerPaddingX;
-	playerY = screenHeight - playerSize - 33;
+	playerY = screenHeight - playerSize - playerPaddingY;
 	score = 0;
 	enemyWidth = 120;
 	enemyHeight = 60;
@@ -33,7 +34,8 @@ Gra::Gra()
 	start();
 }
 
-void Gra::start() {
+void Gra::start() 
+{
 	Graj = StanGry::Ongoing;
 	SDL_Event event;
 	lastRender = SDL_GetTicks();
@@ -82,10 +84,8 @@ void Gra::start() {
 		SDL_RenderCopy(renderer.get(), playerTexture.get(), NULL, &playerPosition);
 		//wyœwietlanie wyrenderowanego obrazu
 		SDL_RenderPresent(renderer.get());
-		SDL_Delay(10);
+		SDL_Delay(17);
 		lastRender = currentRender;
-
-		//------------------------
 
 		if (Graj == Lost) {
 			SDL_Rect losePosition = { 100, 75, 600, 450 };
@@ -123,7 +123,8 @@ void Gra::restartGame() {
 	score = 0;
 	currentLane = 2;
 	speed = 0.05;
-	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.002 }, { 0.0,0.00005 });
+	enemyRespawnTime = 1500;
+	fizykabg = Fizykabg({ 0.0,0.0 }, { 0.0,0.002 }, { 0.0,0.00002 });
 }
 
 void Gra::addEnemies() {
@@ -198,7 +199,7 @@ std::shared_ptr< SDL_Texture > Gra::initText(std::string text) {
 
 	SDL_Color color = { 255, 255, 255 };
 	auto font = initFont("fonts/czcionka.ttf", 20);
-
+	//Render text surface
 	SDL_Surface *surface = TTF_RenderText_Solid(font.get(), text.c_str(), color);
 	SDL_Texture *t = SDL_CreateTextureFromSurface(renderer.get(), surface);
 
@@ -206,6 +207,7 @@ std::shared_ptr< SDL_Texture > Gra::initText(std::string text) {
 		SDL_DestroyTexture(ptr);
 		ptr = NULL;
 	});
+	//Get rid of old surface
 	SDL_FreeSurface(surface);
 
 	return texture;
@@ -240,7 +242,7 @@ bool Gra::kolizja(Przeciwnik* przeciwnik)
 {
 	bool colision = false;
 	// sprawdzanie czy obiekty na siebie nie nachodz¹
-	if (przeciwnik->position[1] <= screenHeight - playerPaddingX && przeciwnik->position[1] + enemyHeight >= screenHeight - playerPaddingX - playerSize)
+	if (przeciwnik->position[1] <= screenHeight - playerPaddingY && przeciwnik->position[1] + enemyHeight >= screenHeight - playerPaddingY - playerSize)
 		if (przeciwnik->position[0] <= currentLane * laneWidth + playerPaddingX + enemyWidth && przeciwnik->position[0] + enemyWidth >= currentLane * laneWidth + playerPaddingX)
 			colision = true;
 	return colision;

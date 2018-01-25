@@ -31,7 +31,7 @@ private:
 	int lastEnemySpawn;
 	int score;
 	int laneWidth, playerX, playerY, playerSize;
-	int enemyWidth, enemyHeight, screenWidth, screenHeight, enemyPadding, playerPaddingX;
+	int enemyWidth, enemyHeight, screenWidth, screenHeight, enemyPadding, playerPaddingX, playerPaddingY;
 	double speed;
 	StanGry Graj;
 public:
